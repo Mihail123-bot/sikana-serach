@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bitcoin Range Scanner</title>
+    <style>
+        body { 
+            background: #0D1117; 
+            color: #00ff9d; 
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .panel {
+            background: #161B22;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #30363D;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+        .stat-box {
+            background: #21262D;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .value { font-size: 24px; font-weight: bold; }
+        .label { font-size: 12px; opacity: 0.8; }
+        #log {
+            height: 400px;
+            overflow-y: auto;
+            background: #21262D;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .log-entry {
+            padding: 5px;
+            border-left: 3px solid #00ff9d;
+            margin: 5px 0;
+        }
+        .success { color: #00ff9d; }
+        .error { color: #ff4444; }
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #2EA043; }
+        .range-display {
+            background: #21262D;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="panel">
+            <h2>🔍 Bitcoin Range Scanner</h2>
+            <div class="range-display">
+                Start: 1<br>
+                End: 7237005577332262213973186563042994240802347767442181523912822696344885093396
+            </div>
+            <div class="proxy-status">
+                Current Page: <span id="currentPage">0</span>
+            </div>
+            <button id="startBtn" onclick="startScanning()">Start Range Scan</button>
+            <button id="stopBtn" onclick="stopScanning()" style="display:none">Stop</button>
+        </div>
+        
+        <div class="panel">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="value" id="scanCount">0</div>
+                    <div class="label">Total Scans</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="scanRate">0</div>
+                    <div class="label">Scans/sec</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="foundCount">0</div>
+                    <div class="label">Found</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const START_RANGE = 1n;
+        const END_RANGE = 7237005577332262213973186563042994240802347767442181523912822696344885093396n;
+        let currentValue = START_RANGE;
+        let isScanning = false;
+        let scanCount = 0;
+        let foundCount = 0;
+        let startTime;
+        let scanInterval;
+
+        async function scan() {
+            try {
+                const response = await fetch(`https://all-bitcoin-private-key.pages.dev/home?page=${currentValue.toString()}`);
+                const html = await response.text();
+                
+                scanCount++;
+                updateStats();
+                
+                if (html.includes('Balance:') && !html.includes('Balance: 0 BTC')) {
+                    foundCount++;
+                    logEntry(`💎 FOUND: Page ${currentValue}`, 'success');
+                }
+
+                logEntry(`Scanned page: ${currentValue}`);
+                document.getElementById('currentPage').textContent = currentValue.toString();
+                
+                currentValue = currentValue + 1n;
+                
+                if (currentValue > END_RANGE) {
+                    stopScanning();
+                    logEntry('Completed full range scan!', 'success');
+                }
+            } catch (error) {
+                logEntry(`Error: ${error.message}`, 'error');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        function startScanning() {
+            isScanning = true;
+            startTime = Date.now();
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'inline';
+            scanInterval = setInterval(scan, 1000);
+            logEntry('Range scanning started');
+        }
+
+        function stopScanning() {
+            isScanning = false;
+            document.getElementById('startBtn').style.display = 'inline';
+            document.getElementById('stopBtn').style.display = 'none';
+            clearInterval(scanInterval);
+            logEntry('Scanning stopped');
+        }
+
+        function updateStats() {
+            document.getElementById('scanCount').textContent = scanCount;
+            document.getElementById('foundCount').textContent = foundCount;
+            
+            const elapsed = (Date.now() - startTime) / 1000;
+            const rate = (scanCount / elapsed).toFixed(2);
+            document.getElementById('scanRate').textContent = rate;
+        }
+
+        function logEntry(message, type = '') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            
+            const log = document.getElementById('log');
+            log.insertBefore(entry, log.firstChild);
+            
+            if (log.children.length > 100) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 's' && !isScanning) startScanning();
+            if (e.key === 'x' && isScanning) stopScanning();
+        });
+    </script>
+</body>
+</html>
