@@ -106,62 +106,91 @@
     <div class="panel">
         <div id="log"></div>
     </div>
+      <script>
+          const START_RANGE = 1n;
+          const END_RANGE = 7237005577332262213973186563042994240802347767442181523912822696344885093396n;
+          let currentValue = START_RANGE;
+          let isScanning = false;
+          let scanCount = 0;
+          let foundCount = 0;
+          let startTime;
+          let scanInterval;
+          const QUEUE_SIZE = 5;
+          const RETRY_DELAY = 500;
+          const MAX_RETRIES = 3;
 
-    <script>
-        const START_RANGE = 1n;
-        const END_RANGE = 7237005577332262213973186563042994240802347767442181523912822696344885093396n;
-        let currentValue = START_RANGE;
-        let isScanning = false;
-        let scanCount = 0;
-        let foundCount = 0;
-        let startTime;
-        let scanInterval;
-          const BATCH_SIZE = 10; // Number of parallel scans
-          const SCAN_INTERVAL = 100; // Milliseconds between batches
+          class ScanQueue {
+              constructor() {
+                  this.queue = [];
+                  this.processing = false;
+              }
 
-          async function scanBatch() {
-              const batch = Array(BATCH_SIZE).fill().map(() => {
-                  const value = currentValue;
-                  currentValue = currentValue + 1n;
-                  return scanPage(value);
-              });
-            
-              await Promise.all(batch);
-          }
-
-          async function scanPage(pageNum) {
-              try {
-                  const response = await fetch(`https://all-bitcoin-private-key.pages.dev/home?page=${pageNum.toString()}`, {
-                      headers: {
-                          'Cache-Control': 'no-cache',
-                          'Pragma': 'no-cache'
-                      }
-                  });
-                
-                  const html = await response.text();
-                  scanCount++;
-                  updateStats();
-                
-                  if (html.includes('Balance:') && !html.includes('Balance: 0 BTC')) {
-                      foundCount++;
-                      logEntry(`💎 FOUND: Page ${pageNum}`, 'success');
+              async add(pageNum) {
+                  this.queue.push(pageNum);
+                  if (!this.processing) {
+                      this.processing = true;
+                      await this.process();
                   }
+              }
 
-                  logEntry(`Scanned: ${pageNum}`);
-              } catch (error) {
-                  logEntry(`Error on page ${pageNum}: ${error.message}`, 'error');
+              async process() {
+                  while (this.queue.length > 0) {
+                      const batch = this.queue.splice(0, QUEUE_SIZE);
+                      await Promise.all(batch.map(page => this.scanWithRetry(page)));
+                      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                  }
+                  this.processing = false;
+              }
+
+              async scanWithRetry(pageNum, attempts = 0) {
+                  try {
+                      const response = await fetch(`https://all-bitcoin-private-key.pages.dev/home?page=${pageNum}`, {
+                          headers: {
+                              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124',
+                              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                              'Cache-Control': 'no-cache'
+                          }
+                      });
+                    
+                      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                      const html = await response.text();
+                    
+                      scanCount++;
+                      updateStats();
+                      logEntry(`Successfully scanned page: ${pageNum}`);
+                    
+                      if (html.includes('Balance:') && !html.includes('Balance: 0 BTC')) {
+                          foundCount++;
+                          logEntry(`💎 FOUND: Page ${pageNum}`, 'success');
+                      }
+                  } catch (error) {
+                      if (attempts < MAX_RETRIES) {
+                          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (attempts + 1)));
+                          return this.scanWithRetry(pageNum, attempts + 1);
+                      }
+                      logEntry(`Failed page ${pageNum} after ${MAX_RETRIES} attempts`, 'error');
+                  }
               }
           }
+
+          const scanner = new ScanQueue();
 
           function startScanning() {
               isScanning = true;
               startTime = Date.now();
               document.getElementById('startBtn').style.display = 'none';
               document.getElementById('stopBtn').style.display = 'inline';
-              scanInterval = setInterval(scanBatch, SCAN_INTERVAL);
-              scanBatch(); // Start first batch immediately
-              logEntry('🚀 Turbo scanning activated');
+            
+              let currentPage = START_RANGE;
+              scanInterval = setInterval(() => {
+                  if (currentPage <= END_RANGE) {
+                      scanner.add(currentPage++);
+                  } else {
+                      stopScanning();
+                  }
+              }, 100);
           }
+      </script>
         function stopScanning() {
             isScanning = false;
             document.getElementById('startBtn').style.display = 'inline';
