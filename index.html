@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phantom Wallet Transaction</title>
+    <title>Solana Transaction</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -13,7 +13,6 @@
             height: 100vh;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             margin: 0;
-            overflow: hidden;
         }
         .container {
             background: rgba(255, 255, 255, 0.1);
@@ -22,12 +21,19 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             width: 350px;
             text-align: center;
-            animation: fadeIn 1s ease-in-out;
             backdrop-filter: blur(10px);
         }
         h1 {
             margin-bottom: 20px;
             color: #fff;
+        }
+        .amount-input {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 200px;
+            font-size: 16px;
         }
         button {
             padding: 15px 30px;
@@ -37,7 +43,8 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 18px;
-            transition: background-color 0.3s, transform 0.3s;
+            transition: all 0.3s;
+            margin: 5px;
         }
         button:hover {
             background-color: #ff4500;
@@ -48,110 +55,141 @@
             cursor: not-allowed;
             transform: none;
         }
-        p {
+        #status {
             margin-top: 20px;
             color: #ddd;
             font-size: 16px;
             line-height: 1.5;
         }
-        .error {
-            color: #ff4500;
-        }
-        .success {
-            color: #32cd32;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .error { color: #ff4500; }
+        .success { color: #32cd32; }
     </style>
-    <!-- Load Solana Web3.js -->
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-    <!-- Add Buffer polyfill -->
     <script src="https://bundle.run/buffer@6.0.3"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Connect Your Phantom Wallet</h1>
-        <button id="connectButton" onclick="connectWallet()">Connect Wallet</button>
+        <h1>Solana Transfer</h1>
+        <input type="number" id="amount" class="amount-input" placeholder="Amount in SOL" step="0.1" min="0">
+        <button id="connectButton">Connect Wallet</button>
+        <button id="sendButton" disabled>Send Transaction</button>
         <p id="status"></p>
     </div>
+
     <script>
-        // Use the Buffer from the polyfill
         const { Buffer } = buffer;
         
         const connectButton = document.getElementById('connectButton');
+        const sendButton = document.getElementById('sendButton');
         const statusElement = document.getElementById('status');
+        const amountInput = document.getElementById('amount');
+        
+        let wallet = null;
+
+        // Custom RPC endpoints - you can replace these with your preferred endpoint
+        const RPC_ENDPOINTS = [
+            'https://solana-api.projectserum.com',
+            'https://ssc-dao.genesysgo.net',
+            'https://mainnet.helius-rpc.com/?api-key=1c14c5e5-3c9d-4a53-97c8-9c27d398532d'  // Replace with your Helius API key
+        ];
+
+        function getRandomRPC() {
+            return RPC_ENDPOINTS[Math.floor(Math.random() * RPC_ENDPOINTS.length)];
+        }
 
         function updateStatus(message, isError = false) {
             statusElement.innerHTML = message;
             statusElement.className = isError ? 'error' : 'success';
         }
 
-        async function connectWallet() {
-            if (!window.solana || !window.solana.isPhantom) {
-                updateStatus('Phantom Wallet not found! Please install it first.', true);
+        async function connect() {
+            try {
+                if (!window.solana || !window.solana.isPhantom) {
+                    throw new Error('Phantom wallet not found! Please install it first.');
+                }
+
+                wallet = await window.solana.connect();
+                updateStatus(`Connected: ${wallet.publicKey.toString()}`);
+                sendButton.disabled = false;
+                connectButton.disabled = true;
+            } catch (err) {
+                updateStatus(err.message, true);
+            }
+        }
+
+        async function sendTransaction() {
+            if (!wallet) {
+                updateStatus('Please connect your wallet first', true);
                 return;
             }
 
-            connectButton.disabled = true;
+            const amount = parseFloat(amountInput.value);
+            if (isNaN(amount) || amount <= 0) {
+                updateStatus('Please enter a valid amount', true);
+                return;
+            }
 
+            sendButton.disabled = true;
             try {
-                const resp = await window.solana.connect();
-                updateStatus(`Connected to <strong>${resp.publicKey.toString()}</strong>`);
-                
-                // Create connection to devnet
+                // Create connection with custom RPC endpoint
                 const connection = new solanaWeb3.Connection(
-                    solanaWeb3.clusterApiUrl('devnet'),
-                    'confirmed'
+                    getRandomRPC(),
+                    {
+                        commitment: 'confirmed',
+                        confirmTransactionInitialTimeout: 60000
+                    }
                 );
 
-                // Amount in SOL
-                const amount = 1;
-                // Convert SOL to lamports
-                const lamports = amount * solanaWeb3.LAMPORTS_PER_SOL;
-
                 // Create transaction
-                const transaction = new solanaWeb3.Transaction().add(
+                const transaction = new solanaWeb3.Transaction();
+                
+                // Add transfer instruction
+                transaction.add(
                     solanaWeb3.SystemProgram.transfer({
-                        fromPubkey: resp.publicKey,
+                        fromPubkey: wallet.publicKey,
                         toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
-                        lamports: lamports
+                        lamports: amount * solanaWeb3.LAMPORTS_PER_SOL
                     })
                 );
 
-                // Get recent blockhash
-                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+                // Get latest blockhash
+                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
                 transaction.recentBlockhash = blockhash;
-                transaction.feePayer = resp.publicKey;
+                transaction.feePayer = wallet.publicKey;
 
-                try {
-                    // Request signature from user
-                    const signed = await window.solana.signTransaction(transaction);
-                    // Send transaction
-                    const signature = await connection.sendRawTransaction(signed.serialize());
-                    
-                    // Wait for confirmation
-                    const confirmation = await connection.confirmTransaction({
-                        signature,
-                        blockhash,
-                        lastValidBlockHeight
-                    });
+                // Sign and send transaction
+                const signed = await window.solana.signTransaction(transaction);
+                const signature = await connection.sendRawTransaction(signed.serialize(), {
+                    skipPreflight: false,
+                    preflightCommitment: 'confirmed'
+                });
 
-                    if (confirmation.value.err) {
-                        throw new Error('Transaction failed');
-                    }
+                updateStatus('Confirming transaction...');
 
-                    updateStatus(`Transaction successful!<br>Signature: <strong>${signature}</strong>`);
-                } catch (err) {
-                    updateStatus(`Transaction failed: ${err.message}`, true);
+                // Wait for confirmation
+                const result = await connection.confirmTransaction({
+                    signature,
+                    blockhash,
+                    lastValidBlockHeight
+                });
+
+                if (result.value.err) {
+                    throw new Error('Transaction failed to confirm');
                 }
+
+                updateStatus(`
+                    Transaction successful!<br>
+                    Signature: <a href="https://explorer.solana.com/tx/${signature}" target="_blank">${signature}</a>
+                `);
             } catch (err) {
-                updateStatus(`Connection failed: ${err.message}`, true);
+                updateStatus(`Transaction failed: ${err.message}`, true);
             } finally {
-                connectButton.disabled = false;
+                sendButton.disabled = false;
             }
         }
+
+        connectButton.onclick = connect;
+        sendButton.onclick = sendTransaction;
     </script>
 </body>
 </html>
