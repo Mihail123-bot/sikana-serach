@@ -27,13 +27,16 @@
             margin-bottom: 20px;
             color: #fff;
         }
-        .amount-input {
-            margin: 20px 0;
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group input {
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
             width: 200px;
             font-size: 16px;
+            margin: 5px 0;
         }
         button {
             padding: 15px 30px;
@@ -63,6 +66,9 @@
         }
         .error { color: #ff4500; }
         .success { color: #32cd32; }
+        .hidden {
+            display: none;
+        }
     </style>
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://bundle.run/buffer@6.0.3"></script>
@@ -70,7 +76,10 @@
 <body>
     <div class="container">
         <h1>Solana Transfer</h1>
-        <input type="number" id="amount" class="amount-input" placeholder="Amount in SOL" step="0.1" min="0">
+        <div class="input-group">
+            <input type="password" id="apiKey" placeholder="Enter RPC API Key" class="hidden">
+            <input type="number" id="amount" placeholder="Amount in SOL" step="0.1" min="0">
+        </div>
         <button id="connectButton">Connect Wallet</button>
         <button id="sendButton" disabled>Send Transaction</button>
         <p id="status"></p>
@@ -83,19 +92,14 @@
         const sendButton = document.getElementById('sendButton');
         const statusElement = document.getElementById('status');
         const amountInput = document.getElementById('amount');
+        const apiKeyInput = document.getElementById('apiKey');
         
         let wallet = null;
 
-        // Custom RPC endpoints - you can replace these with your preferred endpoint
-        const RPC_ENDPOINTS = [
-            'https://solana-api.projectserum.com',
-            'https://ssc-dao.genesysgo.net',
-            'https://mainnet.helius-rpc.com/?api-key=1c14c5e5-3c9d-4a53-97c8-9c27d398532d'  // Replace with your Helius API key
-        ];
-
-        function getRandomRPC() {
-            return RPC_ENDPOINTS[Math.floor(Math.random() * RPC_ENDPOINTS.length)];
-        }
+        // Store your RPC configuration
+        const RPC_CONFIG = {
+            endpoint: 'https://mainnet.helius-rpc.com/?api-key=1c14c5e5-3c9d-4a53-97c8-9c27d398532d'
+        };
 
         function updateStatus(message, isError = false) {
             statusElement.innerHTML = message;
@@ -131,9 +135,9 @@
 
             sendButton.disabled = true;
             try {
-                // Create connection with custom RPC endpoint
+                // Create connection with configured RPC endpoint
                 const connection = new solanaWeb3.Connection(
-                    getRandomRPC(),
+                    RPC_CONFIG.endpoint,
                     {
                         commitment: 'confirmed',
                         confirmTransactionInitialTimeout: 60000
