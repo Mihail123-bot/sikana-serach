@@ -213,28 +213,54 @@
 </head>
 <body>
       <footer class="footer-links">
-          <a href="/terms.html" class="policy-link">Terms of Service</a> | 
+          <a href="/terms.html" class="policy-link">Terms of Service</a>
+          <span class="separator">|</span>
           <a href="/privacy.html" class="policy-link">Privacy Policy</a>
       </footer>
 
       <style>
+      body {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+      }
+
+      .container {
+          margin: auto;
+      }
+
       .footer-links {
-          margin-top: 2rem;
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
           padding: 1rem;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.4);
           border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          z-index: 100;
       }
 
       .policy-link {
-          color: #14F195;
+          color: #FFFFFF;
           font-weight: 600;
           padding: 0.5rem;
           transition: all 0.3s ease;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       }
 
       .policy-link:hover {
-          color: #9945FF;
-          text-shadow: 0 0 8px rgba(153, 69, 255, 0.5);
+          color: #14F195;
+          text-shadow: 0 0 8px rgba(20, 241, 149, 0.5);
+      }
+
+      .footer-links .separator {
+          color: #FFFFFF;
+          margin: 0 0.5rem;
       }
       </style>
     <div class="container">
