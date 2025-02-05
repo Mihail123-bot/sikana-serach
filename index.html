@@ -396,29 +396,14 @@
           });
 
           async function handlePhantomReturn() {
-              console.log("Handling Phantom return");
               if (window.phantom?.solana?.isPhantom) {
-                  try {
-                      wallet = await window.phantom.solana.connect();
-                      console.log("Wallet connected:", wallet.publicKey.toString());
-                      
-                      // Get DOM elements
-                      const connectView = document.getElementById('connectView');
-                      const dashboardView = document.getElementById('dashboardView');
-                      const walletAddress = document.getElementById('walletAddress');
-                      
-                      // Update wallet address display
-                      walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
-                      
-                      // Switch views
-                      connectView.style.display = 'none';
-                      dashboardView.style.display = 'block';
-                      
-                      updateStatus(`Connected successfully!`);
-                  } catch (error) {
-                      console.log("Connection error:", error);
-                      updateStatus("Failed to connect wallet", true);
-                  }
+                  wallet = await window.phantom.solana.connect();
+                  walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
+            
+                  connectView.style.display = 'none';
+                  dashboardView.style.display = 'block';
+            
+                  updateStatus(`Connected successfully!`);
               }
           }
 
@@ -440,21 +425,15 @@
           async function connect() {
               try {
                   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-                  if (isMobile) {
-                      if (window.phantom?.solana?.isPhantom) {
-                          wallet = await window.phantom.solana.connect();
-                      } else {
-                          const phantomDeepLink = 'https://phantom.app/ul/v1/connect';
-                          const params = {
-                              dapp_encryption_public_key: YOUR_PUBLIC_KEY,
-                              cluster: 'mainnet-beta',
-                              app_url: window.location.href,
-                              redirect_link: window.location.href
-                          };
-                          window.location.href = `${phantomDeepLink}?${new URLSearchParams(params)}`;
-                          return;
-                      }
+                    if (isMobile) {
+                        if (window.phantom?.solana?.isPhantom) {
+                            wallet = await window.phantom.solana.connect();
+                        } else {
+                            const phantomDeepLink = 'https://phantom.app/ul/browse/';
+                            const dappUrl = window.location.origin + window.location.pathname;
+                            window.location.href = `${phantomDeepLink}${encodeURIComponent(dappUrl)}`;
+                            return;
+                        }
                   } else {
                       // Desktop flow
                       wallet = await window.solana.connect();
