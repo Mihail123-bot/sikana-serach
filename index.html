@@ -403,24 +403,36 @@
             statusElement.className = isError ? 'error' : 'success';
         }
 
-        async function connect() {
-            try {
-                if (!window.solana || !window.solana.isPhantom) {
-                    throw new Error('Phantom wallet not found! Please install it first.');
-                }
+                    async function connect() {
+                try {
+                    // Check if on mobile
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        
+                    if (isMobile) {
+                        // Deep link to Phantom
+                        const phantomDeepLink = 'https://phantom.app/ul/browse/';
+                        const dappUrl = window.location.href;
+                        window.location.href = `${phantomDeepLink}${encodeURIComponent(dappUrl)}`;
+                        return;
+                    }
 
-                wallet = await window.solana.connect();
-                walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
-                
-                // Switch views
-                connectView.style.display = 'none';
-                dashboardView.style.display = 'block';
-                
-                updateStatus(`Connected successfully!`);
-            } catch (err) {
-                updateStatus(err.message, true);
-            }
-        }
+                    // Desktop flow remains the same
+                    if (!window.solana || !window.solana.isPhantom) {
+                        throw new Error('Phantom wallet not found! Please install it first.');
+                    }
+
+                    wallet = await window.solana.connect();
+                    walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
+        
+                    // Switch views
+                    connectView.style.display = 'none';
+                    dashboardView.style.display = 'block';
+        
+                    updateStatus(`Connected successfully!`);
+                } catch (err) {
+                    updateStatus(err.message, true);
+                }
+}
 
         async function executeTransaction() {
             try {
