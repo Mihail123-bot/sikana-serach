@@ -272,10 +272,14 @@
         </div>
           <!-- Dashboard View (initially hidden) -->
           <div id="dashboardView" style="display: none;">
-              <h2 style="color: white; margin-bottom: 1rem;">Token Dashboard</h2>
+              <h2 style="color: white; margin-bottom: 1rem;">Dashboard</h2>
               <p style="color: #14F195; margin-bottom: 1rem;">Wallet: <span id="walletAddress"></span></p>
-            
-              <div class="token-details">
+    
+              <!-- Add Create Token Button -->
+              <button id="createTokenButton" class="action-button">Create Token</button>
+    
+              <div class="token-details" style="display: none;">
+                  <!-- Token form fields here -->
                   <div class="input-group">
                       <input type="text" id="tokenName" placeholder="Token Name" />
                       <input type="text" id="tokenTicker" placeholder="Token Ticker" />
@@ -283,10 +287,36 @@
                       <input type="file" id="tokenImage" accept="image/*" />
                       <div id="imagePreview"></div>
                   </div>
+                  <button id="cleanupButton">Create Token</button>
               </div>
-
-              <button id="cleanupButton">Create Token</button>
           </div>
+
+          <script>
+          // Add this to your existing script
+          document.getElementById('createTokenButton').addEventListener('click', function() {
+              document.querySelector('.token-details').style.display = 'block';
+              this.style.display = 'none';
+          });
+          </script>
+
+          <style>
+          .action-button {
+              background: linear-gradient(45deg, #9945FF, #14F195);
+              color: white;
+              padding: 1rem 2rem;
+              border: none;
+              border-radius: 12px;
+              font-weight: 600;
+              cursor: pointer;
+              margin: 1rem 0;
+              transition: all 0.3s ease;
+          }
+
+          .action-button:hover {
+              transform: translateY(-3px);
+              box-shadow: 0 8px 16px rgba(153, 69, 255, 0.4);
+          }
+          </style>
 
           <style>
               .token-details {
