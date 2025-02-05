@@ -6,96 +6,36 @@
     <title>Privacy Policy - Solana Token Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-gradient-start: #9945FF;
-            --primary-gradient-end: #14F195;
-            --card-background: rgba(19, 24, 35, 0.9);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-
+        /* Use same styles as main page for consistency */
         body {
             font-family: 'Space Grotesk', system-ui;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background: linear-gradient(-45deg, #9945FF, #14F195, #00C2FF, #7B3FE4);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
+            color: white;
+            padding: 2rem;
         }
-
         .container {
-            background: var(--card-background);
-            padding: 3rem;
-            border-radius: 24px;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                0 0 0 1px rgba(255, 255, 255, 0.1);
-            width: 100%;
             max-width: 800px;
+            margin: 0 auto;
+            background: rgba(19, 24, 35, 0.9);
+            padding: 2rem;
+            border-radius: 24px;
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            animation: float 6s ease-in-out infinite;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
         }
-
         h1 {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            text-shadow: 0 2px 10px rgba(153, 69, 255, 0.5);
             background: linear-gradient(45deg, #14F195, #9945FF);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        h2 {
-            color: #14F195;
-            margin: 1.5rem 0 1rem 0;
-        }
-
-        p {
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
         .back-button {
             display: inline-block;
             padding: 1rem 2rem;
-            background: linear-gradient(45deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            background: linear-gradient(45deg, #9945FF, #14F195);
             color: white;
             text-decoration: none;
-            border-radius: 16px;
+            border-radius: 12px;
             margin-top: 2rem;
-            font-weight: 600;
-            transition: all 0.4s ease;
-        }
-
-        .back-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 20px rgba(153, 69, 255, 0.4);
         }
     </style>
 </head>
@@ -103,7 +43,44 @@
     <div class="container">
         <h1>Privacy Policy</h1>
         <div class="content">
-            <!-- Previous content remains the same -->
+            <h2>1. Information We Collect</h2>
+            <p>• Wallet addresses for transaction processing
+            <br>• Token information and metadata
+            <br>• Transaction history on the Solana blockchain</p>
+
+            <h2>2. How We Use Your Information</h2>
+            <p>• To process your token transactions
+            <br>• To display token details and transaction status
+            <br>• To improve our service functionality</p>
+
+            <h2>3. Data Security</h2>
+            <p>• All transactions are secured through Phantom Wallet
+            <br>• We use industry-standard encryption
+            <br>• Your private keys are never stored or accessed</p>
+
+            <h2>4. Blockchain Transparency</h2>
+            <p>• All transactions are recorded on the Solana blockchain
+            <br>• Transaction details are publicly visible on-chain
+            <br>• Wallet addresses are pseudonymous</p>
+
+            <h2>5. Third-Party Services</h2>
+            <p>• We integrate with Phantom Wallet
+            <br>• We use Solana's RPC nodes
+            <br>• Connection to Solana Explorer for transaction verification</p>
+
+            <h2>6. User Rights</h2>
+            <p>• Control over wallet connections
+            <br>• Right to disconnect wallet
+            <br>• Access to transaction history</p>
+
+            <h2>7. Updates to Privacy Policy</h2>
+            <p>• We may update this policy
+            <br>• Users will be notified of significant changes
+            <br>• Continued use implies acceptance of updates</p>
+
+            <h2>8. Contact Information</h2>
+            <p>For privacy-related questions, contact us at:
+            <br>Discord: morf_22</p>
         </div>
         <a href="/" class="back-button">Back to Dashboard</a>
     </div>
