@@ -1,0 +1,177 @@
+:root {
+    --primary: #14F195;
+    --secondary: #9945FF;
+    --background: #13151C;
+    --card-bg: rgba(19, 24, 35, 0.9);
+    --text: #FFFFFF;
+    --border: rgba(255, 255, 255, 0.1);
+    --error: #FF3B3B;
+    --success: #14F195;
+}
+
+body {
+    font-family: 'Space Grotesk', system-ui;
+    background: linear-gradient(-45deg, #9945FF, #14F195, #00C2FF, #7B3FE4);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text);
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    width: 90%;
+    margin: 40px auto;
+    padding: 40px;
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+h2 {
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.action-button, #connectButton, #cleanupButton {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(45deg, var(--secondary), var(--primary));
+    border: none;
+    border-radius: 16px;
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+}
+
+.action-button:hover, #connectButton:hover, #cleanupButton:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(153, 69, 255, 0.4);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.input-group input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.image-upload {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed var(--border);
+    padding: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+#imagePreview {
+    max-width: 200px;
+    margin: 1rem auto;
+}
+
+#imagePreview img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#status {
+    margin-top: 2rem;
+    padding: 1.2rem;
+    border-radius: 16px;
+    word-break: break-all;
+}
+
+#status.error {
+    background: rgba(255, 59, 59, 0.1);
+    border-left: 4px solid var(--error);
+}
+
+#status.success {
+    background: rgba(20, 241, 149, 0.1);
+    border-left: 4px solid var(--success);
+}
+
+.footer-links {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    z-index: 100;
+}
+
+.policy-link {
+    color: var(--text);
+    text-decoration: none;
+    padding: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.policy-link:hover {
+    color: var(--primary);
+}
+
+.separator {
+    color: var(--text);
+    margin: 0 0.5rem;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    .action-button, #connectButton, #cleanupButton {
+        padding: 0.875rem;
+        font-size: 1rem;
+    }
+}
+s
